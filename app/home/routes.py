@@ -62,12 +62,13 @@ def insert():
 @blueprint.route('/update', methods=['GET', 'POST'])
 def update():
     if request.method == 'POST':
-        my_data = Players.query.get(request.form.get('id'))
+        avg_ppg = request.form['avg_ppg']
+        my_data = Players.query.filter_by(avg_ppg=avg_ppg).first()
         # my_data.name = request.form['name']
         # my_data.position = request.form['position']
         # my_data.team = request.form['team']
         # my_data.salary = request.form['salary']
-        my_data.avg_ppg = request.form['avg_ppg']
+        my_data.avg_ppg = request.form['updatedAvg']
   
         db.session.commit()
         flash("Players Updated Successfully")
