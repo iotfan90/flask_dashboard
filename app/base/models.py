@@ -1,6 +1,6 @@
 
 from flask_login import UserMixin
-from sqlalchemy import Binary, Column, Integer, String
+from sqlalchemy import Binary, Column, Integer, String, Float
 from app import db, login_manager
 from app.base.util import hash_pass
 
@@ -24,12 +24,29 @@ class User(db.Model, UserMixin):
                 value = value[0]
 
             if property == 'password':
-                value = hash_pass( value ) # we need bytes here (not plain str)
+                value = hash_pass(value)  # we need bytes here (not plain str)
                 
             setattr(self, property, value)
 
     def __repr__(self):
         return str(self.username)
+
+
+# Creating model table for our CRUD database
+class Players(db.Model):
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    position = Column(String(10))
+    team = Column(String(10))
+    salary = Column(Integer)
+    avg_ppg = Column(Float)
+
+    def __init__(self, name, position, team, salary, avg_ppg):
+        self.name = name
+        self.position = position
+        self.team = team
+        self.salary = salary
+        self.avg_ppg = avg_ppg
 
 
 @login_manager.user_loader

@@ -1,17 +1,18 @@
 
 from app.home import blueprint
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from app import login_manager
+from app import login_manager, db
 from jinja2 import TemplateNotFound
-from requests import request
+from app.base.models import Players
 
 
 @blueprint.route('/index')
 @login_required
 def index():
-
-    return render_template('index.html')
+    all_data = Players.query.all()
+    return render_template("tables-tables.html", dk_nfl_players=all_data)
+    # return render_template("index.html")
 
 
 @blueprint.route('/<template>')
@@ -32,14 +33,14 @@ def route_template(template):
         return render_template('page-500.html'), 500
 
 
-#query on all our employee data
-@blueprint.route('/')
-def Index():
-    all_data = dk_nfl_players.query.all()
-    return render_template("tables-tables.html", dk_nfl_players=all_data)
+#  query on all our employee data
+# @blueprint.route('/')
+# def Index():
+#     all_data = Players.query.all()
+#     return render_template("tables-tables.html", dk_nfl_players=all_data)
 
 
-#insert data to mysql database via html forms
+#  insert data to mysql database via html forms
 @blueprint.route('/insert', methods=['POST'])
 def insert():
     if request.method == 'POST':
@@ -49,36 +50,35 @@ def insert():
         salary = request.form['salary']
         avg_ppg = request.form['avg_ppg']
   
-        my_data = dk_nfl_players(name, position, team, salary, avg_ppg)
+        my_data = Players(name, position, team, salary, avg_ppg)
         db.session.add(my_data)
         db.session.commit()
   
         flash("Players Inserted Successfully")
-        return redirect(url_for('Index'))
+        return redirect(url_for('home_blueprint.index'))
 
 
 #update players
 @blueprint.route('/update', methods=['GET', 'POST'])
 def update():
     if request.method == 'POST':
-        my_data = dk_nfl_players.query.get(request.form.get('id'))
-  
-        my_data.name = request.form['name']
-        my_data.position = request.form['position']
-        my_data.team = request.form['team']
-        my_data.salary = request.form['salary']
+        my_data = Players.query.get(request.form.get('id'))
+        # my_data.name = request.form['name']
+        # my_data.position = request.form['position']
+        # my_data.team = request.form['team']
+        # my_data.salary = request.form['salary']
         my_data.avg_ppg = request.form['avg_ppg']
   
         db.session.commit()
         flash("Players Updated Successfully")
-        return redirect(url_for('Index'))
+        return redirect(url_for('home_blueprint.index'))
 
 
 #delete players
 @blueprint.route('/delete/<id>/', methods=['GET', 'POST'])
 def delete(id):
-    my_data = dk_nfl_players.query.get(id)
+    my_data = Players.query.get(id)
     db.session.delete(my_data)
     db.session.commit()
     flash("Players Deleted Successfully")
-    return redirect(url_for('Index'))
+    return redirect(url_for('home_blueprint.index'))
